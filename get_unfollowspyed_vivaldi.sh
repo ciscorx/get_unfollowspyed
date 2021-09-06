@@ -1,31 +1,25 @@
 #!/bin/sh
 
 ###############################
-##  get_unfollowspyed.sh  
+##  get_unfollowspyed_vivaldi.sh  
 ###############################
-#  Logs into Twitter and unfollowspy.com, using Xvfb and chromium, and
+#  Logs into Twitter and unfollowspy.com, using Xvfb and vivaldi, and
 #  gets the names of all those people that unfollowed you today!
-#  Although, it will only get the first page of unfollowers.  Useful
-#  for headless servers or if you have no X11 display manager.
+#  Although, it will only get the first page of unfollowers.
 
-#  Requirements: linux, X11, xvfb, xautomation, scrot 0.8-18+,
-#  chromium-browser, Imagemagick (for outputting debug screenshots),
-#  gcc (to compile the c programs for marking up the screen shots),
-#  gedit
-
-#  To configure this script to work on your computer you may need to
-#  run it several times, adding the proper md5 values to each match
-#  condition for each step of the process.  The md5 values and their
-#  respective images for each run can be found in the
-#  /tmp/get_unfollowspyed directory.  The title of the files are
-#  comprised of the md5sums, and the image geometries.
+#  Requirements: linux, xvfb, xautomation, scrot 0.8-18+,
+#  vivaldi-stable, Imagemagick (for optionally outputting
+#  screenshots), gcc (to optionally compile the c programs for marking
+#  up screen shots), gedit
 
 #  Authors/maintainers: ciscorx@gmail.com
 #  License: GNU GPL v3
 
-#  Version 2
+#  Version 1
 
-
+# WARNING: THE BELOW DIRS WILL BE DELETED
+CACHEDIR=/tmp/temp-disk-cache-dir
+XVFB_DIR=/tmp/xvfb_dir
 
 addr1=http://mobile.twitter.com
 addr2=http://unfollowspy.com
@@ -34,16 +28,12 @@ TWITTER_LOGIN="login"
 TWITTER_PASSWD="password"
 TMP_RESULTS_FILE=/tmp/savetheseresults.txt
 output_screenshots=1
-step_temp_dir=/tmp/$(basename $0 ".sh")
-#SCRIPT=`realpath $0`
-#SCRIPTPATH=`dirname $SCRIPT`
+step_temp_dir=/tmp/$(basename $0)
+SCRIPT=`realpath $0`
+# SCRIPTPATH=`dirname $SCRIPT`
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 OUTPUT_FILE="$SCRIPTPATH"/unfollowed.txt
-WEBROWSER=chromium
-
-# WARNING: THE BELOW DIRS WILL BE DELETED
-CACHEDIR=/tmp/temp-disk-cache-dir
-XVFB_DIR=/tmp/xvfb_dir
+WEBROWSER=vivaldi-stable
 
 rm -f "$TMP_RESULTS_FILE"
 rm -rf "$CACHEDIR"
@@ -77,18 +67,16 @@ DSP=$(find_free_display)
 echo using DISPLAY $DSP
 
 rnd() {
-#python -S -c "import random; print( random.randrange($1,$2))"
-shuf -i "$1"-"$2" -n 1
+python -S -c "import random; print( random.randrange($1,$2))"
 }
 
 rnd_offset() {
-#python -S -c "import random; print(random.randrange($1,$(($1 + $2))))"
-shuf -i "$1"-"$(( $1 + $2  ))" -n 1
+python -S -c "import random; print(random.randrange($1,$(($1 + $2))))"
 }
 
 # DO NOT USE THIS because of video ads
 sleep_until_screen_stops_changing ()
- {
+{
     MAX_SLEEP_ITERATIONS=10
     sleep_iteration=0
     rm -f /tmp/screen_stops_changing.ppm
@@ -112,7 +100,7 @@ sleep_until_screen_stops_changing ()
     echo .
     rm -f /tmp/screen_stops_changing.ppm
    }
-   
+    
 save_results () {
     rm -f "$TMP_RESULTS_FILE"
     DISPLAY=$DSP xte  "mousemove  $(rnd_offset 26 67) $(rnd_offset 280 13)"  'mouseclick 1'  "usleep $(rnd 2000000 4000000)" 
@@ -163,17 +151,6 @@ sleep 1
 
 DISPLAY=$DSP $WEBROWSER --user-data-dir="$CACHEDIR" --disk-cache-dir="$CACHEDIR" --profile-directory="Profile 3" $addr2 &
 #DISPLAY=$DSP chromium --user-data-dir=/tmp --disk-cache-dir=/tmp --profile-directory="Profile 3" http://unfollowspy.com &
-#  to click brower options : click 1035 60
-#  save password is @ 913,383,38,18 = ppm md5 02a5dc4c2397ddd0e61f9a28ddfcc25d   mouseclick 923 393
-#  x out of sync passwords is @ 962,87,10,10 = ppm md5 898fad93904253462a4129497474c7bc   mouseclick 970 92
-
-#  Sign in with Twitter messager is @ 597,306,142,20 = ppm md5 31be6c4dd572e82e8f31a9866f873a92
-#  authorize app is @ 222,266,98,17 = ppm md5 12ed592fbb0f75b874c009a359dc9a57 mouseclick 270 274
-#  0 unfollowed message @ 310,210,84,70 = ppm md5 a124f8a66b441e6dc2fc111117144240
-#  manage users v @ 46,246,120,14 = ppm md5 b0f1596f3b375be34278355e0abc93d6
-#  unfollowed @ 26,280,67,13 = ppm md5 8b4af18ad0ac038e7d3f0b1031f61efc
-#  doesnt follow back @ 26,340,123,13 = ppm md5 6aaebc619a22881e5f7169e24a34fb75 
-# up 40 left 40
 
 # back button on browser:
 # DISPLAY=$DSP xte "mousemove $(rnd_offset 28 10) $(rnd_offset 56 12)" 'mouseclick 1'
@@ -188,154 +165,112 @@ sleep 10
  
 
 #debug
-# check for default browser
-md5=$(get_md5 35 110 375 20)
+
+# check for cookies note 
+md5=$(get_md5 275 108 117 16)
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:1
 fi
 
-if [ $md5 = "6827ff4ef9c930807d12636d9b9cf477" ]; then
-    echo Chrome isnt your default browser
-    sleep 3
-     
-fi
-
-
-#debug
-# check for the x Cancel button on set default browser prompt and click it
-md5=$(get_md5 1034 115 12 12)
-if [ $output_screenshots = 1 ]; then
-echo $step - $md5; step=$(($step + 1))  #### step:2
-fi
-
-if [ $md5 = "a42c9b7f21a1eb148c110b78fc9f4303" ]; then
-    ## Set as Default button has focus
-    # click Set As Default
-    # DISPLAY=$DSP xte 'mousemove 510 216' 'mouseclick 1'
-    # click x Cancel
-    DISPLAY=$DSP xte 'mousemove 1040 121' 'mouseclick 1'  'sleep 1'
-       echo clickd cancel button on set default browser prompt
-fi
-
-
-
-# check for default browser - archlinux
-md5=$(get_md5 60 95 265 20)
-if [ $output_screenshots = 1 ]; then
-echo $step - $md5; step=$(($step + 1))  #### step:1
-fi
-
-if [ $md5 = "6f856b170716b4ca16a9f82d42951cb4" ]; then
-    echo Chrome isnt your default browser - archlinux
-    sleep 3
-     
-    #debug
-    # check for the x Cancel button on set default browser prompt and click it
-    md5=$(get_md5 1030 100 12 12)
-    if [ $output_screenshots = 1 ]; then
-	echo $step - $md5; step=$(($step + 1))  #### step:2
-    fi
-
-    if [ $md5 = "2d2268d91e99626344cc9bbf5550db37" ]; then
-	## Set as Default button has focus
-	# click Set As Default
-	# DISPLAY=$DSP xte 'mousemove 510 216' 'mouseclick 1'
-	# click x Cancel
-	DISPLAY=$DSP xte 'mousemove 1036 106' 'mouseclick 1'  'sleep 1'
-	echo clickd cancel button on set default browser prompt - archlinux 
-    fi
-fi
-
-# check for cookies note - archlinux
-md5=$(get_md5 150 100 120 20)
-if [ $output_screenshots = 1 ]; then
-echo $step - $md5; step=$(($step + 1))  #### step:1
-fi
-
-if [ $md5 = "1481ec135171f794ec383d0666bc59c7" ] || [ $md5 = "05f59759c98f4a07a19667ad22090896" ]; then
+if [ $md5 = "4df4a87e0cc5569bda4e4e35e3c2a6fa" ] ; then
     echo Cookie note message encountered
     sleep 3
      
     #debug
     # check for the Continue button on cookies note prompt and click it
-    md5=$(get_md5 748 100 78 20)
+    md5=$(get_md5 873 108 73 16)
     if [ $output_screenshots = 1 ]; then
 	echo $step - $md5; step=$(($step + 1))  #### step:2
     fi
 
-    if [ $md5 = "0cc836310c4db56af8523c53167ff1e2" ] || [ $md5 = "2b3940e8f4cf5714e5e53291eabb55f4" ]; then
+    if [ $md5 = "ef26872b290621b918909eee0584515c" ] ; then
 	## Set as Default button has focus
-	# click Set As Default
-	# DISPLAY=$DSP xte 'mousemove 510 216' 'mouseclick 1'
-	# click x Cancel
-	DISPLAY=$DSP xte "mousemove $(rnd_offset 748 78) $(rnd_offset 110 20)" 'mouseclick 1'  'sleep 1'
-	echo clickd cancel button on set default browser prompt - archlinux or r4pi
+	DISPLAY=$DSP xte "mousemove $(rnd_offset 873 73) $(rnd_offset 108 16)" 'mouseclick 1'  'sleep 1'
+	echo clickd Continue on cookies note prompt
     fi
 fi
 
 
 # check for Sign in with Twitter button
-md5=$(get_md5 597 306 142 20)
+md5=$(get_md5  720 313 142 16)
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:0
 fi
 
-if [ $md5 = "31be6c4dd572e82e8f31a9866f873a92" ] || [ $md5 = "cb038df5e4151eff8fc6e35d6ab1150e" ]; then
+if [ $md5 = "fe5dc1e075bd548d8d725b298ae60d4c" ]; then
 #    DISPLAY=$DSP xte  'key Tab' "usleep $(rnd 1000000 3500000)" 'key Tab' "usleep $(rnd 1900000 3500000)"  'key Return' 'usleep 5000000'
-    DISPLAY=$DSP xte "mousemove $(rnd_offset 597 140) $(rnd_offset 308 14)" 'mouseclick 1'
-                                                      # 597 308 140 14 368961c31f0cf1fe538eb28cea261e49
+    DISPLAY=$DSP xte "mousemove $(rnd_offset 720 142) $(rnd_offset 313 16)" 'mouseclick 1'
     echo pressed the Return key to Sign with Twitter
-    sleep_until_screen_stops_changing
 fi
 
 sleep 5
-
-# check for Authorize Unfollowspy to access your account? - archlinux
-md5=$(get_md5 200 170 360 60)
+sleep_until_screen_stops_changing
+echo sleep_until_screen_stop_changing 1
+# check for Authorize Unfollowspy to access your account? 
+md5=$(get_md5 326 173 350 60)
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:1
 fi
 
-if [ $md5 = "d4756d659d38651d890b663e3a0e4aff" ] || [ $md5 = "d4756d659d38651d890b663e3a0e4af" ] || [ $md5 = "a8377f028911034f43464307e6d4d0af" ] ; then
-    echo encountered Authorize Unfollowspy to access your account message - archlinux
+if [ $md5 = "533c656260d42a8f286286e08f8dadb7" ] || [ $md5 = "989235671ffa98cc329f7a2648b978cd" ]; then
+    echo encountered Authorize Unfollowspy to access your account message
     sleep 3
      
     #debug
     # check password prompt has focus
-    md5=$(get_md5 207 272 215 33)
+    md5=$(get_md5 326 276 200 33)
     if [ $output_screenshots = 1 ]; then
 	echo $step - $md5; step=$(($step + 1))  #### step:2
     fi
 
-    if [ $md5 = "552438929ba132d65a7a88457524899b" ] || \
-	   [ $md5 = "9563a4b337b12edf0990294c4c6c8e44" ] || \
-	   [ $md5 = "0e56ee011235d5cb5b1771ffaa4aa33a" ] || \
-	   [ $md5 = "9235867fad35fb1d06adb1738c811624" ]; then
-	DISPLAY=$DSP xte "str $TWITTER_LOGIN"  "usleep $(rnd_offset 300000 3000000)" 'key Tab' "usleep $(rnd_offset 300000 3000000)" "str $TWITTER_PASSWD" "usleep $(rnd_offset 300000 3000000)" 'key Return'
+    if [ $md5 = "c092cfb7c437d87cfc147c8054e88e51" ] || \
+	   [ $md5 = "63f89821cd9ace8e156baeb15dc95ccf" ]; then
+	DISPLAY=$DSP xte "str $TWITTER_LOGIN"  "usleep $(rnd_offset 300000 3000000)" 'key Tab' "usleep $(rnd_offset 300000 3000000)" "str $TWITTER_PASSWD" "usleep $(rnd_offset 1000000 3000000)" 'key Return'
 	echo entered twitter login and password
-	sleep 3
-#	sleep_until_screen_stops_changing 
-# check for Save Password - archlinux
-	md5=$(get_md5 676 210 130 20)
+	sleep 5
+	echo sleep_until_screen_stops_changing 2
+	sleep_until_screen_stops_changing 
+# check for Save Password prompt
+	md5=$(get_md5 961 33 130 20)
 	if [ $output_screenshots = 1 ]; then
 	    echo $step - $md5; step=$(($step + 1))  #### step:1
 	fi
 
-	if [ $md5 = "6b045c2401b47c69e563cb25673a64f7" ]; then
-	    echo encountered Save Password? prompt - archlinux
+	if [ $md5 = "029a7d835ba0763b57ad584bb57d010d" ]; then
+	    echo encountered Save Password? prompt
 	    sleep 3
 	    
     #debug
-	    # check for Save Password Button
-	    md5=$(get_md5 910 350 42 16)
+
+
+	    # check for x out of save password button
+	    
+	    md5=$(get_md5 1245 26 10 10 )
 	    if [ $output_screenshots = 1 ]; then
 		echo $step - $md5; step=$(($step + 1))  #### step:2
 	    fi
 	    
-	    if [ $md5 = "7bac2e33e15ab864488834d62a6cdf6e" ]; then
-		DISPLAY=$DSP xte "mousemove $(rnd_offset 910 42) $(rnd_offset 350 16)"  'mouseclick 1'   # save password button @ 910 350 42 16 7bac2e33e15ab864488834d62a6cdf6e
-		#DISPLAY=$DSP xte "mousemove $(rnd_offset 830 42) $(rnd_offset 350 16)"  'mouseclick 1'   # never save password button @ 830 350 42 16 831fe04cb0c1519dadd4b5b5031c2f92
-		#DISPLAY=$DSP xte "mousemove $(rnd_offset 961 12) $(rnd_offset 87 12)"  'mouseclick 1'   # x out of save password prompt @ 961 87 12 12 4bbb60c811e530b7c4d4d3feda2c42e5
+	    if [ $md5 = "e1756483ba5cc9ca65a3e7c0a30cb876" ]; then
+		
+		DISPLAY=$DSP xte  "mousemove  $(rnd_offset 1245 10) $(rnd_offset 26 10)"  'mouseclick 1'  "usleep $(rnd 2000000 4000000)"
+		echo clicked x out of save password 
+	    fi
+	    
+	    # check for Save Password Button
+	    md5=$(get_md5 1197 159 33 12)
+	    if [ $output_screenshots = 1 ]; then
+		echo $step - $md5; step=$(($step + 1))  #### step:2
+	    fi
+	    
+	    if [ $md5 = "a5956f72e3efdbce31b86b7fb039a37b" ]; then
+		#DISPLAY=$DSP xte "mousemove $(rnd_offset 1197 33) $(rnd_offset 159 12)"  'mouseclick 1'
+		            # save password button @ 1197 159 33 12 a5956f72e3efdbce31b86b7fb039a37b
+
+		#DISPLAY=$DSP xte "mousemove $(rnd_offset 1116 40) $(rnd_offset 159 12)"  'mouseclick 1'
+		            # never save password button @ 1116 159 40 12 7cb7d1f96707929f14f8f2dac81183e0
+
+		#DISPLAY=$DSP xte "mousemove $(rnd_offset 1245 10) $(rnd_offset 26 10)"  'mouseclick 1'
+		            # x out of save password prompt @ 961 87 12 12 4bbb60c811e530b7c4d4d3feda2c42e5
 		echo clicked Save Password button
 	    fi
 	fi
@@ -344,7 +279,7 @@ if [ $md5 = "d4756d659d38651d890b663e3a0e4aff" ] || [ $md5 = "d4756d659d38651d89
 	
     fi  # password prompt has focus
 
-    # look for Authorize app button
+    # look for Authorize app button (not configured yet)
     md5=$(get_md5 225 270 95 12)
     if [ $output_screenshots = 1 ]; then
 	echo $step - $md5; step=$(($step + 1))  #### step:1
@@ -376,13 +311,13 @@ if [ $md5 = "12ed592fbb0f75b874c009a359dc9a57" ]; then
 fi
 
 
-# check for 0 unfollowed message @ 310,210,84,70 = ppm md5 a124f8a66b441e6dc2fc111117144240
-md5=$(get_md5 310 210 84 70 )
+# check for 0 unfollowed message 
+md5=$(get_md5 395 210 84 70 )
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:4
 fi
 
-if [ $md5 = "a124f8a66b441e6dc2fc111117144240" ] || [ $md5 = "6f0974780debe36304a6b1bf655fe39c" ]; then
+if [ $md5 = "44e78ea7cf2a83d856e7e1ba7d5d6e76" ]; then
     echo There are zero unfollowed, so quitting.
     DISPLAY=$DSP xte "keydown Control_L" "str q" "keyup Control_L"
     kill_xvfb
@@ -391,25 +326,26 @@ if [ $md5 = "a124f8a66b441e6dc2fc111117144240" ] || [ $md5 = "6f0974780debe36304
 fi
 
 #  click manage users v @ 46,246,120,14 = ppm md5 b0f1596f3b375be34278355e0abc93d6
-md5=$(get_md5 46 246 120 14 )
+md5=$(get_md5 76 250 120 14)
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:5
 fi
 
-if [ $md5 = "b0f1596f3b375be34278355e0abc93d6" ] || [ $md5 = "28d7857457238b0b2f1af57a9aa98bf0" ]; then
+if [ $md5 = "00534992427e308538378ae91ebccc7d" ]; then
     echo Clicked managee users v
     
-    DISPLAY=$DSP xte  "mousemove  $(rnd_offset 46 120) $(rnd_offset 246 14)"  'mouseclick 1'  "usleep $(rnd 1000000 3000000)" 
+    DISPLAY=$DSP xte  "mousemove  $(rnd_offset 76 120) $(rnd_offset 250 14)"  'mouseclick 1'  "usleep $(rnd 1000000 3000000)" 
 fi
 
 #  click unfollowed @ 26,280,67,13 = ppm md5 8b4af18ad0ac038e7d3f0b1031f61efc
-md5=$(get_md5 26 280 67 13 )
+md5=$(get_md5 77 284 88 13 )
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:6
 fi
 
-if [ $md5 = "8b4af18ad0ac038e7d3f0b1031f61efc" ] || [ $md5 = "72352b4a091861222fb2954dfa719c3d" ]; then
+if [ $md5 = "4f27f9c8d16b5ab77ba19a20e884afc3" ]; then
 
+    DISPLAY=$DSP xte  "mousemove  $(rnd_offset 77 88) $(rnd_offset 284 13)"  'mouseclick 1'  "usleep $(rnd 1000000 3000000)" 
     save_results
     add_encountered=0
     checkforad=`cat "$TMP_RESULTS_FILE" | grep Ad | sed '1q'`
