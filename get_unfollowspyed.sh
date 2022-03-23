@@ -23,7 +23,7 @@
 #  Authors/maintainers: ciscorx@gmail.com
 #  License: GNU GPL v3
 
-#  Version 2
+#  Version 3
 
 
 
@@ -275,14 +275,14 @@ fi
 
 
 # check for Sign in with Twitter button
-md5=$(get_md5 597 306 142 20)
+md5=$(get_md5 550 240 160 18) 
 if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:0
 fi
 
-if [ $md5 = "31be6c4dd572e82e8f31a9866f873a92" ] || [ $md5 = "cb038df5e4151eff8fc6e35d6ab1150e" ]; then
+if [ $md5 = "619a546635ace56e7034544a51d42be0" ] || [ $md5 = "add this" ]; then
 #    DISPLAY=$DSP xte  'key Tab' "usleep $(rnd 1000000 3500000)" 'key Tab' "usleep $(rnd 1900000 3500000)"  'key Return' 'usleep 5000000'
-    DISPLAY=$DSP xte "mousemove $(rnd_offset 597 140) $(rnd_offset 308 14)" 'mouseclick 1'
+    DISPLAY=$DSP xte "mousemove $(rnd_offset 550 160) $(rnd_offset 240 18)" 'mouseclick 1'
                                                       # 597 308 140 14 368961c31f0cf1fe538eb28cea261e49
     echo pressed the Return key to Sign with Twitter
     sleep_until_screen_stops_changing
@@ -340,6 +340,31 @@ if [ $md5 = "d4756d659d38651d890b663e3a0e4aff" ] || [ $md5 = "d4756d659d38651d89
 	    fi
 	fi
 	
+# check for Save Password2 - archlinux
+	md5=$(get_md5 677 254 130 14)
+	if [ $output_screenshots = 1 ]; then
+	    echo $step - $md5; step=$(($step + 1))  #### step:1
+	fi
+
+	if [ $md5 = "04b82c000bd1528b70713599badb8078" ]; then
+	    echo encountered Save Password? prompt2 - archlinux
+	    sleep 3
+	    
+    #debug
+	    # check for Save Password Button
+	    md5=$(get_md5 910 385 42 16)
+	    if [ $output_screenshots = 1 ]; then
+		echo $step - $md5; step=$(($step + 1))  #### step:2
+	    fi
+	    
+	    if [ $md5 = "6f089e201014f9e5939201161ef8cf20" ]; then
+		DISPLAY=$DSP xte "mousemove $(rnd_offset 910 42) $(rnd_offset 385 16)"  'mouseclick 1'   # save password button @ 910 350 42 16 7bac2e33e15ab864488834d62a6cdf6e
+		#DISPLAY=$DSP xte "mousemove $(rnd_offset 830 42) $(rnd_offset 350 16)"  'mouseclick 1'   # never save password button @ 830 350 42 16 831fe04cb0c1519dadd4b5b5031c2f92
+		#DISPLAY=$DSP xte "mousemove $(rnd_offset 961 12) $(rnd_offset 87 12)"  'mouseclick 1'   # x out of save password prompt @ 961 87 12 12 4bbb60c811e530b7c4d4d3feda2c42e5
+		echo clicked Save Password button
+	    fi
+	fi
+	
 
 	
     fi  # password prompt has focus
@@ -382,8 +407,8 @@ if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:4
 fi
 
-if [ $md5 = "a124f8a66b441e6dc2fc111117144240" ] || [ $md5 = "6f0974780debe36304a6b1bf655fe39c" ]; then
-    echo There are zero unfollowed, so quitting.
+if [ $md5 = "a124f8a66b441e6dc2fc111117144240" ] || [ $md5 = "6f0974780debe36304a6b1bf655fe39c" ] || [ $md5 = "adc323914883dd310b8e2d17aceda597" ] || [ $md5 = "860fe7c794876f7dbb4a90b9a0ccbec7" ]; then
+    echo There are zero new unfollowers, so quitting.
     DISPLAY=$DSP xte "keydown Control_L" "str q" "keyup Control_L"
     kill_xvfb
     exit 2
@@ -396,7 +421,7 @@ if [ $output_screenshots = 1 ]; then
 echo $step - $md5; step=$(($step + 1))  #### step:5
 fi
 
-if [ $md5 = "b0f1596f3b375be34278355e0abc93d6" ] || [ $md5 = "28d7857457238b0b2f1af57a9aa98bf0" ]; then
+if [ $md5 = "b0f1596f3b375be34278355e0abc93d6" ] || [ $md5 = "28d7857457238b0b2f1af57a9aa98bf0" ] || [ $md5 = "09cd38f6db6acafe0f36b656c0052faf" ]; then
     echo Clicked managee users v
     
     DISPLAY=$DSP xte  "mousemove  $(rnd_offset 46 120) $(rnd_offset 246 14)"  'mouseclick 1'  "usleep $(rnd 1000000 3000000)" 
