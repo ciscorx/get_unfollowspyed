@@ -42,7 +42,6 @@ rm -rf "$step_temp_dir"
 mkdir -p "$step_temp_dir"
 rm -rf "$XVFB_DIR"
 mkdir -p  "$XVFB_DIR"
-rm /tmp/*.ovpn 
 step=0
 
 remove_last_character_from_string_if_its_forward_slash () {
@@ -280,6 +279,21 @@ if [ $md5 = "4e9e704f520c75fa1893d2bd88394411" ] || [ $md5 = "add another" ]; th
 
 	DISPLAY=$DSP xte "str $twitter_passwd" "usleep $(rnd 1000000 3000000)" "key Return"  "usleep $(rnd_offset 3000000 3000000)" 
 
+	# look for the password message, which if its still there indicates that the password failed
+	
+
+	# look for text of twitter.com/home in address bar    
+	md5=$(get_md5 323 480 60 15)
+	if [ $output_screenshots = 1 ]; then
+	    echo $step - $md5; step=$(($step + 1))  #### step:6
+	fi
+	
+	if [ $md5 = "92c64f480e084d79cfd63b598223375c" ] || [ $md5 = "add another" ]; then
+	    echo password failed
+	    logged_in=0
+	fi
+
+	
 	# look for text of twitter.com/home in address bar    
 	md5=$(get_md5 150 55 130 15)
 	if [ $output_screenshots = 1 ]; then
@@ -311,46 +325,46 @@ if [ $logged_in = 1 ]; then
     DISPLAY=$DSP xte "keydown Control_L" "str l" "usleep $(rnd 100000 300000)" "keyup Control_L" "usleep $(rnd 100000 200000)" 
     
     DISPLAY=$DSP xte "str https://twitter.com/$twitter_login/following" "usleep $(rnd 1000000 3000000)" "key Return"
-fi
 
 
-echo "following:" > /tmp/following.txt
-click_page
-set_25_percent
 
-rm -f /tmp/screen_stops_changing.ppm
-DISPLAY=$DSP scrot /tmp/screen_stops_changing.ppm
-lastmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
-#    echo screen changing $md5
-tmpmd5="tmpmd5"
-sleep 2
+    echo "following:" > /tmp/following.txt
+    click_page
+    set_25_percent
+
+    rm -f /tmp/screen_stops_changing.ppm
+    DISPLAY=$DSP scrot /tmp/screen_stops_changing.ppm
+    lastmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
+    #    echo screen changing $md5
+    tmpmd5="tmpmd5"
+    sleep 2
     
-#  keep page down scrolling until screen stops changing 
+    #  keep page down scrolling until screen stops changing 
     until [ $tmpmd5 = $lastmd5 ]; do 
-	 select_all_ctrl_c
-	 DISPLAY=$DSP xclip -o | dd of=/tmp/following.txt oflag=append conv=notrunc 
-	 DISPLAY=$DSP xte "key Page_Down"
-	 DISPLAY=$DSP xte "usleep $(random_number 2000000 4000000)"
-         DISPLAY=$DSP xte "sleep 2"
-	 
+	select_all_ctrl_c
+	DISPLAY=$DSP xclip -o | dd of=/tmp/following.txt oflag=append conv=notrunc 
+	DISPLAY=$DSP xte "key Page_Down"
+	DISPLAY=$DSP xte "usleep $(random_number 2000000 4000000)"
+        DISPLAY=$DSP xte "sleep 2"
+	
 	rm -f /tmp/screen_stops_changing.ppm
 	DISPLAY=$DSP scrot /tmp/screen_stops_changing.ppm
 	lastmd5=$tmpmd5
 	tmpmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
-#	echo screen changing $tmpmd5
+	#	echo screen changing $tmpmd5
 	echo -n .
 	sleep 1
     done
     
     echo .
     rm -f /tmp/screen_stops_changing.ppm
-set_default
+    set_default
 
-
-grep -A1 '^@' /tmp/following.txt | grep -B1 '^Follows you' | grep -e "@" | sort | uniq > /tmp/follows_you.txt
-cp /tmp/follows_you.txt /mnt/disk/bkup/follows_you/`date +%y%m%d`.txt
-
-
+    
+    grep -A1 '^@' /tmp/following.txt | grep -B1 '^Follows you' | grep -e "@" | sort | uniq > /tmp/follows_you.txt
+    cp /tmp/follows_you.txt /mnt/disk/bkup/follows_you/`date +%y%m%d`.txt
+    
+fi
 
 kill_xvfb
-echo "ok"
+echo "exited script at end"
