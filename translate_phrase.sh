@@ -12,7 +12,10 @@
 #  License: GNU GPL v3
 
 #exec &> /dev/tty
-exec 1> /dev/tty
+# Check if the script is running in an interactive shell
+if [[ $- == *i* ]]; then
+    exec 1> /dev/tty
+fi
 exec 2> /dev/null
 # WARNING: THE BELOW DIRS WILL BE DELETED
 CACHEDIR=/tmp/temp-disk-cache-dir
