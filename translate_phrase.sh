@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###############################
-##  google_translate_phrase.sh  
+##  translate_phrase.sh  
 ###############################
 #  This script echos the English translation of a foreign phrase,
 #  passed as a parameter by visiting the webpage
