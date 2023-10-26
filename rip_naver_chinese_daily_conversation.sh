@@ -62,7 +62,7 @@ remove_last_character_from_string_if_its_forward_slash () {
 
 pause_until_audio_stops_playing() {
     audio_is_playing=true
-    while [ audio_is_playing = true ]; do
+    while [ $audio_is_playing = true ]; do
 	if pacmd list-sink-inputs | grep -q "state: RUNNING"; then
 	    sleep 5
 	else
@@ -243,15 +243,18 @@ get_md5 () {
 
 record_audio() {
         play_all 
+
 	parec | sox -t raw -r 44.1k -e signed -b 16 -c 2 - -C 192 /tmp/tmpoutput.wav&
-	xte  "usleep $(rnd_offset 20000000 5000000)"
+	PARCEC_PID=$!
+	xte  "usleep $(rnd_offset 20000000 1000000)"
 
 	pause_until_audio_stops_playing
 	# stop recording audio by killing the sox process
-	kill $!
+	kill "${PARCEC_PID}"
+
+	wait "${PARCEC_PID}" 2>/dev/null
 	sleep 1
 	# trim silence from audio
-	# cp /tmp/tmpoutput.wav /tmp/output.wav
 	sox -V /tmp/tmpoutput.wav /tmp/output.wav reverse silence 1 2 0.5% reverse
 
 	# convert from wav to mp3
@@ -264,16 +267,6 @@ record_audio() {
 
 echo $$ > /tmp/killthis
 
-# have to start out by killing any opened chromium sessions or the script will try to use an already opened session
-#kill_webbrowser
-#kill_xvfb
-#sleep 1
-#rm -rf "$XVFB_DIR"
-#mkdir -p "$XVFB_DIR"
-#Xvfb $DSP -fbdir "$XVFB_DIR" &
-#sleep 1 
-
-#DISPLAY=$DSP $WEBROWSER --user-data-dir="$CACHEDIR" --disk-cache-dir="$CACHEDIR" --profile-directory="Profile 3" $addr1 &
 
     # if no argument is passed to the script then call a browser, otherwise just assume  there is already a browser opened  and pointed at the correct web page, 
 if [ $# -eq 0 ]; then
@@ -281,50 +274,25 @@ if [ $# -eq 0 ]; then
 else
     alt_tab
 fi
-#sleep 5
+
 ## reset zoom if applied
 ## DISPLAY=$DSP xte 'keydown Control_L' 'str 0' 'keyup Control_L' 
 sleep 10
 
 
 
-# look for text of dict.naver.com in address bar    
-md5=$(get_md5 150 55 130 15)
-if [ $output_screenshots = 1 ]; then
-    echo $step - $md5; step=$(($step + 1))  #### step:7
-fi
 	
 
-if [ $md5 = "653bbd5e8cef9ffcb5301ba58ccc176b" ] || [ $md5 = "add another" ]; then
-    echo already logged into 1 or 2
-    logged_in=1
-    sleep 1
-fi
 
  #   DISPLAY=$DSP xte "keydown Control_L" "str l" "usleep $(rnd 100000 300000)" "keyup Control_L" "usleep $(rnd 100000 200000)" 
     
  #   DISPLAY=$DSP xte "str https://learn.dict.naver.com/conversation#/cndic/" "usleep $(rnd 1000000 3000000)" "key Return"
 
 
-  #  alt_tab
-  #  click_page
-  #  set_default
-  #  set_25_percent
-#    set_default
     
- #   rm -f /tmp/screen_stops_changing.ppm
- #   scrot /tmp/screen_stops_changing.ppm
- #   lastmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
-    #    echo screen changing $md5
- #   tmpmd5="tmpmd5"
- #   sleep 2
-
-#    while true; do 
-#	click_page
 	sleep 1
 	select_all_ctrl_c
 	sleep  2
-#	click_page
 	FILENAME_BASE=`xclip  -o| head -n 7 | tail -n 1 | awk '{print $1}'`
 year="${FILENAME_BASE:0:4}"
 month="${FILENAME_BASE:4:2}"
@@ -361,8 +329,6 @@ fi
 	tmpfile_chinese_translated=/tmp/tmpfile_nochinese.txt
         ./translate_chinese_to_en.py "/tmp/tmpfile_nokorean.txt" "${tmpfile_chinese_translated}"
 	
-#        awk -v lineNum=$(grep -n "^Translation Result$" "${tmpfile_chinese_translated}" | cut -d: -f1) ' NR != (lineNum-2) && NR != (lineNum-1) && NR != lineNum { print }' "${tmpfile_chinese_translated}" > /tmp/tmpfile_mod.txt
-	# 	cp /tmp/tmpfile_mod.txt /tmp/tmpfile.txt
 	sed -i '/^Send feedback$/,/^Translation results available$/d' "${tmpfile_chinese_translated}"
 	   # remove blank lines if 2 or more consecutive blank lines
 	sed -i ':a; /^\s*$/N; /\n\s*$/D'  "${tmpfile_chinese_translated}" 
@@ -372,24 +338,6 @@ fi
 	if [ -z "$1" ] || [ ! "$1" = "noaudio" ] ; then
 	    record_audio
 	fi
-#	scrot /tmp/screen_stops_changing.ppm
-#	lastmd5=$tmpmd5
-#	tmpmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
-	#	echo screen changing $tmpmd5
-#	echo -n .
 	sleep 1
-#	click_previous_page
- #   done
-    
-#    echo .
- #   rm -f /tmp/screen_stops_changing.ppm
- #   set_default
 
-    
-   #  grep -A1 '^@' /tmp/following.txt | grep -B1 '^Follows you' | grep -e "@" | sort | uniq > /tmp/follows_you.txt
-   # cp /tmp/follows_you.txt /mnt/disk/bkup/follows_you/`date +%y%m%d`.txt
-    
-
-#kill_xvfb
 	alt_tab
-echo "exited script at end"
