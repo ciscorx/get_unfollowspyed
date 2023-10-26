@@ -6,9 +6,9 @@
 #  This script visits the webpage https://linedict.com, using xvfb,
 #  xautomation and chromium.  If an argument is passed to the script
 #  then the script will execute alt tab and assume there is a browser
-#  there pointed at the correct webpage, with the focus set to the
-#  correct object.  If the argument passed is "justaudio" then skip
-#  the translating and just record the audio
+#  there pointed at the correct webpage.  If the argument passed is
+#  "justaudio" then skip the translating and just record the audio.
+#  If the argument is "noaudio" then just translate the text.
  
 #  Requirements: linux, xvfb, xautomation, scrot 0.8-18+,
 #  chromium-browser, Imagemagick (for optionally outputting
@@ -46,8 +46,8 @@ FILENAME_BASE=
 mkdir -p  "${RIP_DIRECTORY}"
 rm -rf "$CACHEDIR"
 mkdir -p "$CACHEDIR" 
-rm -rf "$step_temp_dir"
-mkdir -p "$step_temp_dir"
+#rm -rf "$step_temp_dir"
+#mkdir -p "$step_temp_dir"
 rm -rf "$XVFB_DIR"
 mkdir -p  "$XVFB_DIR"
 step=0
@@ -110,6 +110,7 @@ python3 -S -c "import random; print(random.randrange($1,$(($1 + $2))))"
 
 tab_to_listen_all() {
 
+    xte "keydown Control_L" "str l" "usleep $(rnd 100000 300000)" "keyup Control_L" "usleep $(rnd_offset 500000 200000)" 
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
@@ -119,6 +120,10 @@ tab_to_listen_all() {
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
+    xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
+    xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
+
+
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
     xte "key Tab" "usleep $(rnd_offset ${tabduration} ${tabduration_offset})"
 
@@ -363,7 +368,10 @@ fi
 	sed -i ':a; /^\s*$/N; /\n\s*$/D'  "${tmpfile_chinese_translated}" 
 
 	cp "${tmpfile_chinese_translated}"  "${RIP_DIRECTORY}${FILENAME_BASE}.txt"
-	record_audio
+
+	if [ -z "$1" ] || [ ! "$1" = "noaudio" ] ; then
+	    record_audio
+	fi
 #	scrot /tmp/screen_stops_changing.ppm
 #	lastmd5=$tmpmd5
 #	tmpmd5=`md5sum /tmp/screen_stops_changing.ppm | awk '{print $1}'`
